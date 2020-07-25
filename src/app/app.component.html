@@ -50,50 +50,44 @@
 </div>
 
 <div class="mb-5">
-<div *ngIf="adverts">
-  <table class="table">
-    <thead>
-      <tr>
-        <th scope="col" class="text-center">Status</th>
-        <!-- <th scope="col">#</th> -->
-        <th scope="col">Nazwa ogłoszenia</th>
-        <th scope="col">Cena</th>
-        <th scope="col">Data</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let advert of adverts; index as i">
-        <td style="width:100px">
-          <button class="mini-button btn btn-success" (click)="upvote(advert)">
-          </button>
-          <button class="mini-button btn btn-danger" (click)="downvote(advert)">
-          </button>
-          <button class="mini-button btn btn-info" (click)="clearvote(advert)"> </button>
-        </td>
-        <!-- <th scope="row">{{i+1}}</th> -->
-        <td><a href="{{advert.url}}" [class.text-success]="advert.status == status.Upvote"
-            [class.text-danger]="advert.status == status.Downvote">{{advert.name}}</a></td>
-        <td>{{advert.priceNum}} zł</td>
-        <td>{{advert.publicationDate}}</td>
-      </tr>
-    </tbody>
-  </table>
+  <div *ngIf="adverts">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col" class="text-center">Status</th>
+          <!-- <th scope="col">#</th> -->
+          <th scope="col">Nazwa ogłoszenia</th>
+          <th scope="col">Cena</th>
+          <th scope="col">Data</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let advert of adverts; index as i">
+          <td style="width:100px">
+            <button class="mini-button btn btn-success" (click)="upvote(advert)">
+            </button>
+            <button class="mini-button btn btn-danger" (click)="downvote(advert)">
+            </button>
+            <button class="mini-button btn btn-info" (click)="clearvote(advert)"> </button>
+          </td>
+          <!-- <th scope="row">{{i+1}}</th> -->
+          <td><a href="{{advert.url}}" [class.text-success]="advert.status == status.Upvote"
+              [class.text-danger]="advert.status == status.Downvote">{{advert.name}}</a></td>
+          <td>{{advert.priceNum}} zł</td>
+          <td>{{advert.publicationDate}}</td>
+        </tr>
+      </tbody>
+    </table>
 
 
-  <div class="my-2">
-    <button class="btn btn-primary mr-2" (click)="process()">Odśwież</button>
-    <button class="btn btn-danger mr-2" (click)="previousPage()">Poprzednia strona</button>
-    <button class="btn btn-success mr-2" (click)="nextPage()">Następna strona</button>
+    <div class="my-2">
+      <button class="btn btn-primary mr-2" (click)="process()">Odśwież</button>
+      <button class="btn btn-danger mr-2" (click)="previousPage()">Poprzednia strona</button>
+      <button class="btn btn-success mr-2" (click)="nextPage()">Następna strona</button>
+    </div>
+
   </div>
-
-</div>
-<div *ngIf='!adverts'>
-  <p>Ta aplikacja do działania potrzebuje włączonego pluginu CORS Everywhere!</p>
-  <p><a href="https://addons.mozilla.org/en-US/firefox/addon/cors-everywhere/">Wtyczka dla Firefoxa</a></p>
-  <p><a
-      href="https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf?hl=en">Wtyczka
-      dla Chrome</a></p>
-  <mat-spinner></mat-spinner>
-
-</div>
+  <div *ngIf='!adverts'>
+    Ładowanie...
+  </div>
 </div>
