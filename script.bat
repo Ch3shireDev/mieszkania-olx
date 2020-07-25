@@ -1,4 +1,4 @@
 ng build --prod --output-path docs
 git add -A
-git commit -am "Release"
+git commit -m "Release"
 git push -f
