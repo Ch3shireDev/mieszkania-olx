@@ -37,7 +37,6 @@ export class AppComponent implements OnInit {
   }
 
   public upvote(advert: Advert) {
-    console.log(advert);
     advert.setStatus(Status.Upvote);
   }
   public downvote(advert: Advert) {
