@@ -62,7 +62,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let advert of adverts; index as i">
+        <tr *ngFor="let advert of adverts; index as i" [class.promoted-ad]="advert.promoted">
           <td style="width:100px">
             <button class="mini-button btn btn-success" (click)="upvote(advert)">
             </button>
@@ -91,3 +91,4 @@
     Ładowanie...
   </div>
 </div>
+<p>Jak jakieś wąty to na <a href="mailto:igor.nowicki.spam@gmail.com">igor.nowicki.spam@gmail.com</a></p>

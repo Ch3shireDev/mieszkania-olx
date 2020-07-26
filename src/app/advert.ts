@@ -13,22 +13,35 @@ export class Advert {
   public priceNum: number;
   public img: string;
   public publicationDate: string;
+  public promoted: boolean;
 
   public status: any;
 
-  constructor(root: any) {
-    this.id = root.attributes['data-id'].value;
-    const tbody = root.children[0];
-    const tr1 = tbody.children[0];
-    this.url = tr1.children[0].children[0].attributes.href.value;
+  // constructor() {
+  //   // this.id = root.attributes['data-id'].value;
+  //   // const tbody = root.children[0];
+  //   // const tr1 = tbody.children[0];
+  //   // this.url = tr1.children[0].children[0].attributes.href.value;
 
-    this.name = tr1.children[1].children[0].children[0].children[0].innerText.trim();
-    const tr2 = tbody.children[1];
-    this.price = tr1.children[2].children[0].innerText.trim();
-    this.priceNum = parseFloat(this.price.replace(/([\d\s\,\.]+).*/, '$1').replace(' ', ''));
-    this.publicationDate = tr2.children[0].children[0].children[0].children[1].innerText.trim();
+  //   // this.name = tr1.children[1].children[0].children[0].children[0].innerText.trim();
+  //   // const tr2 = tbody.children[1];
+  //   // this.price = tr1.children[2].children[0].innerText.trim();
+  //   // this.priceNum = parseFloat(this.price.replace(/([\d\s\,\.]+).*/, '$1').replace(' ', ''));
+  //   // this.publicationDate = tr2.children[0].children[0].children[0].children[1].innerText.trim();
 
+  //   // this.getStatus();
+  // }
+
+  constructor(x: any) {
+    this.id = x.id;
+    this.name = x.name;
+    this.price = x.price;
+    this.priceNum = parseInt(x.priceNum, 10);
+    this.promoted = x.promoted;
+    this.publicationDate = x.publicationDate;
+    this.url = x.url;
     this.getStatus();
+
   }
 
   public setStatus(status) {

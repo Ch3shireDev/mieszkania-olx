@@ -36,8 +36,17 @@ a:visited {
 .input-group-text {
   width: 100px;
   text-align: center;
-  margin:auto;
+  margin: auto;
 }
 
-html, body { height: 100%; }
+html,
+body {
+  height: 100%;
+}
 /* body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; } */
+
+.promoted-ad,
+.promoted-ad td a {
+  background: #dddddd;
+  color: #888888;
+}

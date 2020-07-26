@@ -4,7 +4,9 @@ const curl = require( "curl" );
 var bodyParser = require( "body-parser" );
 const app = express();
 app.use( bodyParser.json() );
+
 app.use( express.static( 'dist' ) );
+
 const port = process.env.PORT || 3000;
 app.listen( port, () => console.log( `Example app listening at http://localhost:${ port }` ) );
 
@@ -14,6 +16,7 @@ class Advert
 {
   constructor ( root )
   {
+    this.promoted = root.classList.contains( 'promoted-list' );
     this.id = root.attributes[ 'data-id' ].value;
     const tbody = root.children[ 0 ];
     const tr1 = tbody.children[ 0 ];
@@ -59,20 +62,38 @@ function parseData ( html )
   return adverts;
 }
 
-app.get( '/api/', ( req, res ) =>
+app.get( '/api', ( req, res ) =>
 {
-  const url = "https://www.olx.pl/nieruchomosci/mieszkania/wynajem/warszawa/?search%5Bfilter_float_price%3Afrom%5D=1000&search%5Bfilter_float_price%3Ato%5D=2000&search%5Bprivate_business%5D=private&search%5Bdistrict_id%5D=373";
+
+  let priceFrom = req.query.priceFrom;
+  const priceTo = req.query.priceTo;
+  const privateBusiness = req.query.privateBusiness;
+  const page = req.query.page;
+  const districtId = req.query.districtId;
+  let city = req.query.city;
+
+  if ( priceFrom === undefined ) priceFrom = 0;
+  if ( city === undefined ) city = "warszawa";
+
+
+  let url = `https://www.olx.pl/nieruchomosci/mieszkania/wynajem/${ city }/?`;
+  if ( priceFrom != null ) url += `search%5Bfilter_float_price%3Afrom%5D=${ priceFrom }`;
+  if ( priceTo != null ) url += `&search%5Bfilter_float_price%3Ato%5D=${ priceTo }`;
+  if ( privateBusiness != null ) url += `&search%5Bprivate_business%5D=${ privateBusiness }`;
+  if ( districtId != null ) url += `&search%5Bdistrict_id%5D=${ districtId }`;
+  if ( page != null ) url += `&page=${ page }`;
 
   curl.get( url, null, ( err, resp, body ) =>
   {
-    if ( resp.statusCode == 200 )
+    if ( resp !== undefined && resp.statusCode == 200 )
     {
       const adverts = parseData( body );
       res.send( adverts );
     }
     else
     {
-      console.log( "error while fetching url" );
+      console.log( url );
+      res.status( 500 );
     }
   } );
 

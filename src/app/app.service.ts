@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+// import { map } from 'rxjs/operators';
 import { Advert } from './advert';
 declare var $: any;
 
@@ -11,7 +12,14 @@ export class AppService {
 
   constructor(private http: HttpClient) { }
 
-  public getAdverts(priceFrom: number, priceTo: number, privateBusiness: string, districtId: number, page: number): Observable<Advert[]> {
-    return this.http.get<Advert[]>('/api/');
+  public getAdverts(city: string, priceFrom: number, priceTo: number, privateBusiness: string, districtId: string, page: number):
+    Observable<Advert[]> {
+    const params = { priceFrom: priceFrom.toString(), priceTo: priceTo.toString(), privateBusiness, districtId, page: page.toString(), city };
+    const httpOptions = {
+      headers: { 'Content-Type': 'application/json' },
+      params: { ...params }
+    };
+
+    return this.http.get<Advert[]>('/api', httpOptions);
   }
 }

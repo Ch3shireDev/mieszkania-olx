@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Advert, Status } from './advert';
 import { AppService } from './app.service';
+// import { map } from 'rxjs/operators';
 declare var $: any;
 @Component({
   selector: 'app-root',
@@ -19,7 +20,7 @@ export class AppComponent implements OnInit {
   public priceFrom = 1000;
   public priceTo = 2000;
   public privateBusiness = 'private';
-  public districtId = 373;
+  public districtId = '373';
   public page = 1;
 
 
@@ -31,8 +32,9 @@ export class AppComponent implements OnInit {
   }
 
   public process() {
-    this.appService.getAdverts(this.priceFrom, this.priceTo, this.privateBusiness, this.districtId, this.page).subscribe(adverts => {
-      this.adverts = adverts;
+    this.appService.getAdverts(this.city.toLowerCase(), this.priceFrom, this.priceTo, this.privateBusiness, this.districtId, this.page).subscribe(adverts => {
+      this.adverts = adverts
+        .map(a => new Advert(a));
     });
   }
 
