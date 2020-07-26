@@ -1,7 +1,11 @@
 
 const express = require( 'express' );
-const curl = require( "curl" );
+// const bent = require( 'bent' );
+const axios = require( "axios" );
+
 var bodyParser = require( "body-parser" );
+const jsdom = require( "jsdom" );
+const { JSDOM } = jsdom;
 const app = express();
 app.use( bodyParser.json() );
 
@@ -29,25 +33,22 @@ class Advert
   }
 }
 
-
-// get url() {
-//   let url = `https://www.olx.pl/nieruchomosci/mieszkania/wynajem/${this.city.toLowerCase()}/?`;
-//   url += `search%5Bfilter_float_price%3Afrom%5D=${this.priceFrom}`;
-//   url += `&search%5Bfilter_float_price%3Ato%5D=${this.priceTo}`;
-//   url += `&search%5Bprivate_business%5D=${this.privateBusiness}`;
-//   if (this.districtId != null) {
-//     url += `&search%5Bdistrict_id%5D=${this.districtId}`;
-//   }
-//   url += `&page=${this.page}`;
-//   return url;
-// }
-
-
+function parsePage ( html )
+{
+  try
+  {
+    const dom = new JSDOM( html );
+    const $ = ( require( 'jquery' ) )( dom.window );
+    var page = $( 'a[data-cy="page-link-last"]' )[ 0 ].textContent.trim();
+    return parseInt( page, 10 );
+  }
+  catch{
+    return 1;
+  }
+}
 
 function parseData ( html )
 {
-  const jsdom = require( "jsdom" );
-  const { JSDOM } = jsdom;
   const dom = new JSDOM( html );
   const $ = ( require( 'jquery' ) )( dom.window );
 
@@ -56,45 +57,93 @@ function parseData ( html )
 
   for ( var i = 0; i < items.length; i++ )
   {
-    const advert = new Advert( items[ i ] );
-    adverts.push( advert );
+    try
+    {
+      const advert = new Advert( items[ i ] );
+      adverts.push( advert );
+    }
+    catch{
+      console.log( 'error for parsing the advert' );
+    }
   }
   return adverts;
 }
 
-app.get( '/api', ( req, res ) =>
+async function getAllAdverts ( priceFrom, priceTo, privateBusiness, districtId, city )
 {
+  let page = 1;
+  let lastPage = 1;
 
+  let Adverts = [];
+
+  while ( page !== lastPage + 1 )
+  {
+    let url = `https://www.olx.pl/nieruchomosci/mieszkania/wynajem/${ city }/?`;
+    if ( priceFrom != null ) url += `search%5Bfilter_float_price%3Afrom%5D=${ priceFrom }`;
+    if ( priceTo != null ) url += `&search%5Bfilter_float_price%3Ato%5D=${ priceTo }`;
+    if ( privateBusiness != null && privateBusiness !== 'undefined' ) url += `&search%5Bprivate_business%5D=${ privateBusiness }`;
+    if ( districtId != null && districtId !== 'undefined' ) url += `&search%5Bdistrict_id%5D=${ districtId }`;
+    if ( page != null ) url += `&page=${ page }`;
+
+    const getData = async url =>
+    {
+      try
+      {
+        const response = await axios.get( url );
+        const data = response.data;
+        return data;
+      } catch ( error )
+      {
+        return null;
+      }
+    };
+
+    const body = await getData( url );
+    if ( body === null ) break;
+    if ( lastPage === 1 ) lastPage = parsePage( body );
+    let adverts = parseData( body );
+
+    if ( adverts !== undefined )
+    {
+      adverts.forEach( ad =>
+      {
+        Adverts.push( ad );
+      } );
+    }
+
+    if ( Adverts.length > 200 ) break;
+    page += 1;
+  }
+
+  return Adverts;
+}
+
+
+app.get( '/api', async ( req, res ) =>
+{
   let priceFrom = req.query.priceFrom;
   const priceTo = req.query.priceTo;
   const privateBusiness = req.query.privateBusiness;
-  const page = req.query.page;
   const districtId = req.query.districtId;
   let city = req.query.city;
 
   if ( priceFrom === undefined ) priceFrom = 0;
   if ( city === undefined ) city = "warszawa";
 
+  let Adverts = await getAllAdverts( priceFrom, priceTo, privateBusiness, districtId, city );
 
-  let url = `https://www.olx.pl/nieruchomosci/mieszkania/wynajem/${ city }/?`;
-  if ( priceFrom != null ) url += `search%5Bfilter_float_price%3Afrom%5D=${ priceFrom }`;
-  if ( priceTo != null ) url += `&search%5Bfilter_float_price%3Ato%5D=${ priceTo }`;
-  if ( privateBusiness != null ) url += `&search%5Bprivate_business%5D=${ privateBusiness }`;
-  if ( districtId != null ) url += `&search%5Bdistrict_id%5D=${ districtId }`;
-  if ( page != null ) url += `&page=${ page }`;
+  // Czyszczenie z powtórek.
+  let adverts = [];
 
-  curl.get( url, null, ( err, resp, body ) =>
+  let ids = new Set( [] );
+  Adverts.forEach( advert =>
   {
-    if ( resp !== undefined && resp.statusCode == 200 )
-    {
-      const adverts = parseData( body );
-      res.send( adverts );
-    }
-    else
-    {
-      console.log( url );
-      res.status( 500 );
-    }
+    let id = advert.id;
+    if ( ids.has( id ) ) return;
+    ids.add( id );
+    adverts.push( advert );
   } );
 
+
+  res.send( adverts );
 } );

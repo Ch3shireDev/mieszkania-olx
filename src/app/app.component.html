@@ -1,56 +1,59 @@
 <h1>OLXy</h1>
 <p>Bo z jakiegoś powodu system upvote/downvote jest za trudny dla developerów olx.</p>
-<p>Napisane kurna w trzy godziny, nie czepiaj się.</p>
+<p>Napisane kurna w dwa dni, nie czepiaj się.</p>
+<p>Wszelkie problemy słać na <a href="mailto:igor.nowicki.spam@gmail.com">igor.nowicki.spam@gmail.com</a>.</p>
 
-<form>
-  <div class="input-group input-group-sm mb-3" style="width:300px">
-    <div class="input-group-prepend">
-      <span class="input-group-text">Miasto</span>
-    </div>
-    <input type="text" class="form-control" [(value)]="city">
-  </div>
-  <div class="input-group input-group-sm mb-3" style="width:300px">
-    <div class="input-group-prepend">
-      <span class="input-group-text" id="inputGroup-sizing-sm">Cena od</span>
-    </div>
-    <input type="text" class="form-control" [(value)]="priceFrom">
-  </div>
-  <div class="input-group input-group-sm mb-3" style="width:300px">
-    <div class="input-group-prepend">
-      <span class="input-group-text" id="inputGroup-sizing-sm">Cena do</span>
-    </div>
-    <input type="text" class="form-control" [(value)]="priceTo">
-  </div>
-  <div class="input-group input-group-sm mb-3" style="width:300px">
-    <div class="input-group-prepend">
-      <span class="input-group-text" id="inputGroup-sizing-sm">Prywatny</span>
-    </div>
-    <input type="text" class="form-control" [(value)]="privateBusiness">
-  </div>
-  <div class="input-group input-group-sm mb-3" style="width:300px">
-    <div class="input-group-prepend">
-      <span class="input-group-text" id="inputGroup-sizing-sm">Id dzielnicy</span>
-    </div>
-    <input type="text" class="form-control" [(value)]="districtId">
-  </div>
-  <div class="input-group input-group-sm mb-3" style="width:300px">
-    <div class="input-group-prepend">
-      <span class="input-group-text" id="inputGroup-sizing-sm">Strona</span>
-    </div>
-    <input type="text" class="form-control" [(value)]="page">
-  </div>
 
-</form>
+<div class="input-group input-group-sm mb-3" style="width:300px">
+  <div class="input-group-prepend">
+    <span class="input-group-text">Miasto</span>
+  </div>
+  <input type="text" class="form-control" [(value)]="city">
+</div>
+<div class="input-group input-group-sm mb-3" style="width:300px">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="inputGroup-sizing-sm">Cena od</span>
+  </div>
+  <input type="text" class="form-control" [(value)]="priceFrom">
+</div>
+<div class="input-group input-group-sm mb-3" style="width:300px">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="inputGroup-sizing-sm">Cena do</span>
+  </div>
+  <input type="text" class="form-control" [(value)]="priceTo">
+</div>
+<div class="input-group input-group-sm  mb-3" style="width:300px">
+  <div class="input-group-prepend">
+    <span class="input-group-text">Działalność</span>
+  </div>
+  <select class="custom-select" [(ngModel)]="privateBusiness" [ngModelOptions]="{standalone: true}">
+    <option *ngFor="let businessType of businessTypes" [ngValue]="businessType.id">{{businessType.name}}
+  </select>
+</div>
+
+
+<div class="input-group input-group-sm  mb-3" style="width:300px">
+  <div class="input-group-prepend">
+    <span class="input-group-text">Dzielnica</span>
+  </div>
+  <select class="custom-select" [(ngModel)]="districtId" [ngModelOptions]="{standalone: true}">
+    <option *ngFor="let district of districts" [ngValue]="district.id">{{district.name}}
+  </select>
+</div>
 
 
 <div class="my-2">
   <button class="btn btn-primary mr-2" (click)="process()">Odśwież</button>
-  <button class="btn btn-danger mr-2" (click)="previousPage()">Poprzednia strona</button>
-  <button class="btn btn-success mr-2" (click)="nextPage()">Następna strona</button>
+  <button class="btn btn-info mr-2" (click)="setSortByPrice()">Sortuj po cenie</button>
+  <button class="btn btn-danger mr-2"
+    (click)="setBlacklist()">{{blacklist?"Pokaż czerwone":"Zniknij czerwone"}}</button>
+  <button class="btn btn-success mr-2" (click)="setWhitelist()">{{whitelist?"Pokaż zielone":"Zniknij zielone"}}</button>
 </div>
 
 <div class="mb-5">
-  <div *ngIf="adverts">
+  <div *ngIf="adverts && adverts.length>0">
+    <p>Znaleziono, kurna, {{adverts.length}} wyników. Jak za mało to dlatego że ustawiłem limit aby nie zamordować
+      serwera.</p>
     <table class="table">
       <thead>
         <tr>
@@ -62,7 +65,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let advert of adverts; index as i" [class.promoted-ad]="advert.promoted">
+        <tr *ngFor="let advert of filterAdverts(adverts); index as i" [class.promoted-ad]="advert.promoted">
           <td style="width:100px">
             <button class="mini-button btn btn-success" (click)="upvote(advert)">
             </button>
@@ -70,7 +73,6 @@
             </button>
             <button class="mini-button btn btn-info" (click)="clearvote(advert)"> </button>
           </td>
-          <!-- <th scope="row">{{i+1}}</th> -->
           <td><a href="{{advert.url}}" [class.text-success]="advert.status == status.Upvote"
               [class.text-danger]="advert.status == status.Downvote">{{advert.name}}</a></td>
           <td>{{advert.priceNum}} zł</td>
@@ -79,16 +81,23 @@
       </tbody>
     </table>
 
-
-    <div class="my-2">
-      <button class="btn btn-primary mr-2" (click)="process()">Odśwież</button>
-      <button class="btn btn-danger mr-2" (click)="previousPage()">Poprzednia strona</button>
-      <button class="btn btn-success mr-2" (click)="nextPage()">Następna strona</button>
-    </div>
-
   </div>
-  <div *ngIf='!adverts'>
-    Ładowanie...
+  <div *ngIf='(!adverts || adverts.length===0) && error === undefined'>
+    <div style="position: relative; padding:5rem;">
+      <nb-card accent="danger">
+        <nb-card-body class="card-body">
+          <ngx-spinner [fullScreen]="false" type="ball-clip-rotate-multiple" size="medium" bdColor="rgba(0,0,0,0%)"
+            size="large" color="#000000">
+          </ngx-spinner>
+        </nb-card-body>
+      </nb-card>
+    </div>
+    <p>
+      Ładowanie. Ogarnij się, to nie facebook, przetwarzam nieboską liczbę rekordów na kawałku ziemniaka. To
+      może
+      chwilę potrwać.</p>
+  </div>
+  <div *ngIf="error">
+    <p class="text-danger">{{error}}</p>
   </div>
 </div>
-<p>Jak jakieś wąty to na <a href="mailto:igor.nowicki.spam@gmail.com">igor.nowicki.spam@gmail.com</a></p>

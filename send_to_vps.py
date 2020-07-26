@@ -18,7 +18,7 @@ except:
 
 try:
     os.system('ng build --prod')
-    shutil.move('./dist', 'deploy')
+    shutil.copy('./dist', 'deploy')
 except:
     print('Error compiling Angular project. Aborting...')
     exit()

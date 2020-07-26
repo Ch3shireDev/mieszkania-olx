@@ -12,9 +12,14 @@ export class AppService {
 
   constructor(private http: HttpClient) { }
 
-  public getAdverts(city: string, priceFrom: number, priceTo: number, privateBusiness: string, districtId: string, page: number):
+  public getAdverts(city: string, priceFrom: number, priceTo: number, privateBusiness: string, districtId: string):
     Observable<Advert[]> {
-    const params = { priceFrom: priceFrom.toString(), priceTo: priceTo.toString(), privateBusiness, districtId, page: page.toString(), city };
+    const params = {
+      priceFrom: priceFrom.toString(),
+      priceTo: priceTo.toString(),
+      privateBusiness, districtId,
+      city
+    };
     const httpOptions = {
       headers: { 'Content-Type': 'application/json' },
       params: { ...params }
