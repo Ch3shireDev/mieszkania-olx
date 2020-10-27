@@ -47,3 +47,8 @@ config.py
 dist/**
 __pycache__/**
 .vscode/**
+mieszkania-olx-win32-x64
+*.zip
+package-lock.json
+resources
+client/node_modules
